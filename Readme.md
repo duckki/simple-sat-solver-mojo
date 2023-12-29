@@ -100,7 +100,7 @@ The C++ version turned out to be much faster than the Mojo version (over 95x~119
 
 Mojo is aiming to be a superset of Python. Even at an early version (0.6.1), it was straightforward to port the Python version to Mojo. But, there were several issues as indicated in the code comments. Here is the summary of my expereince.
 
-### Unimplemented features and workaroud
+### Unimplemented features and workarouds
 
 I think these are minor compatibility issues that can be easily fixed as Mojo matures.
 
@@ -110,22 +110,22 @@ I think these are minor compatibility issues that can be easily fixed as Mojo ma
 * No `TextIOWrapper` type: Use `FileHandle`.
 * `DynamicVector` instance couldn't be returned in a tuple.
 * `sys.argv` is a function, not a list: Change `argv[1]` to `argv()[1]`.
+* Closures can't capture by reference, yet: Pass references explictly to the closure.
 
 ### Unexpected compile failures
 
 Also, I experienced a few unexpected issues that might be just bugs in the current version of Mojo (0.6.1).
 
-First, the variable scope of local variables in `def` functions are not hoisted to the top of the function.
+The variable scope of local variables in `def` functions are not hoisted to the top of the function.
 
 * Symptom: Local variables that are assigned under a `then`-clause wasn't accessible after the if-statement.
 * Workaround: Those variables need to be explicitly declared outside of the if-statement.
-
-Second, a borrowed `self` argument couldn't be used as reference in closures. The captured version of the symbol didn't seem to reflect its borrow declaration.
-
-* Workaround: The `self` needs to be passed as an explicit argument to the closure.
+* I filed https://github.com/modularml/mojo/issues/1574 for this, but it seems to be intentional deviation from Python.
 
 ### `borrowed`/`inout` annotations can't be avoided
 
 Even if all of those compiler and compatibility issues are resolved, I don't think some of those `borrowed`/`inout` annotations on arguments could be elided altogether. That means not all Python code can be ported without a change. I expect many Python code will need some additional annotations in their Mojo port, even if some of that could be automated.
 
 As an alternative, Mojo could feature an "auto" ownership for `def` functions, instead of `owned` default, allowing the compiler to decide `owned`/`borrowed`/`inout` based on the usage of the arguments within the function definition.
+
+The issue will be more pronounced with closures, because Python closures are expected to capture local variables by reference. The `owned` default ownership is more likely to break closures, even after Mojo implementing capture declarations in closures.
