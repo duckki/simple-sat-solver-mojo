@@ -15,6 +15,7 @@ struct Solver: # Porting issue: `class` is not supported yet.
         self.n_vars = n_vars
         self.clauses = clauses
         self.assignment = Assignment( n_vars + 1 ) # Porting issue: No list comprehension yet
+        self.assignment.resize(n_vars + 1, 0)
 
     # Porting issue: `borrowed` was needed to avoid a compile error.
     def is_consistent(borrowed self) -> Bool:
