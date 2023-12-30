@@ -96,6 +96,19 @@ Interestingly, Python is indeed lighter at loading, recording 0.025 seconds comp
 
 The C++ version turned out to be much faster than the Mojo version (over 95x~119x speedup over the baseline Python version). That suggests Mojo still has a long way to go in terms of code generation.
 
+## Performance Bottleneck in the Mojo version
+
+The ported Mojo version couldn't use for-each loop directly over the content of `DynamicVector`. Instead, I had to use an index to access the vector indirectly. It seems to be the main bottleneck.
+
+```python
+        def is_consistent_clause(borrowed that: Self, clause: Clause) -> Bool:
+            for idx_lit in range(len(clause)):
+                lit = clause[idx_lit]
+                ...
+```
+
+I implemented another version using the (unsafe) `Pointer` type (in [sat-solver-unsafe.mojo](sat-solver-unsafe.mojo)) and the Mojo's performance matched C++'s.
+
 ## Porting Python to Mojo
 
 Mojo is aiming to be a superset of Python. Even at an early version (0.6.1), it was straightforward to port the Python version to Mojo. But, there were several issues as indicated in the code comments. Here is the summary of my expereince.
